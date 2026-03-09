@@ -6,9 +6,16 @@ import { useLifeStore } from '@/store/useLifeStore'
 import { cn } from '@/lib/utils'
 import { ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
+const partnerTraitOptions = [
+    '乐观', '坚韧', '敏感', '冒险', '稳重', '内向',
+    '外向', '创意', '理性', '感性', '自律', '有野心',
+    '善良', '幽默', '独立', '务实', '浪漫', '强势',
+]
+
 const steps = [
     { id: 'intro', title: '缘分探索' },
     { id: 'basic', title: 'TA的基础信息' },
+    { id: 'traits', title: 'TA的特质' },
     { id: 'career', title: 'TA的事业轨迹' },
 ]
 
@@ -102,6 +109,45 @@ export default function PartnerOnboarding({ onComplete, onCancel }: { onComplete
                             )}
 
                             {currentStep === 2 && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground mb-4">选择 TA 最突出的特质标签（可多选）</p>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {partnerTraitOptions.map(trait => {
+                                            const selected = (partnerData.traits || '').split('，').filter(Boolean).includes(trait);
+                                            return (
+                                                <button
+                                                    key={trait}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = (partnerData.traits || '').split('，').filter(Boolean);
+                                                        const next = selected
+                                                            ? current.filter(t => t !== trait)
+                                                            : [...current, trait];
+                                                        setPartnerData({ traits: next.join('，') });
+                                                    }}
+                                                    className={cn(
+                                                        "px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
+                                                        selected
+                                                            ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                                                            : "border-border hover:border-black/30 dark:hover:border-white/30 text-foreground"
+                                                    )}
+                                                >
+                                                    {trait}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="或自由输入，用逗号分隔"
+                                        value={partnerData.traits || ''}
+                                        onChange={e => setPartnerData({ traits: e.target.value })}
+                                        className="w-full bg-white/50 dark:bg-black/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                                    />
+                                </div>
+                            )}
+
+                            {currentStep === 3 && (
                                 <div className="space-y-6">
                                     <div>
                                         <label className="block text-sm font-medium mb-2 text-muted-foreground">当前城市</label>

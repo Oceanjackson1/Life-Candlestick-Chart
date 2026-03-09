@@ -3,65 +3,83 @@
 import { useEffect, useState } from 'react'
 import { useLifeStore } from '@/store/useLifeStore'
 import { generateLifeData, KlineDataPoint } from '@/lib/klineEngine'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceDot } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { ArrowLeft, Share, RefreshCw } from 'lucide-react'
 
 // Custom shape for the K-Line Candlestick
+// Uses background prop to compute y positions since BarChart doesn't pass yAxis.scale to shapes
 const Candlestick = (props: any) => {
-    const { x, y, width, height, payload, xAxis, yAxis } = props;
+    const { x, width, payload, background } = props;
+    if (!payload) return null;
+
     const { open, close, high, low, isBull } = payload;
 
-    if (!yAxis || !xAxis) return null;
+    const chartTop = background?.y ?? 0;
+    const chartHeight = background?.height ?? 500;
 
-    const yHigh = yAxis.scale(high);
-    const yLow = yAxis.scale(low);
-    const yOpen = yAxis.scale(open);
-    const yClose = yAxis.scale(close);
+    const scale = (val: number) => chartTop + chartHeight - (val / 100) * chartHeight;
+
+    const yHigh = scale(high);
+    const yLow = scale(low);
+    const yOpen = scale(open);
+    const yClose = scale(close);
 
     const vTop = Math.min(yOpen, yClose);
     const vBottom = Math.max(yOpen, yClose);
-    const vHeight = Math.max(2, vBottom - vTop); // min 2px height
+    const vHeight = Math.max(2, vBottom - vTop);
 
     const midX = x + width / 2;
-    const color = isBull ? "#10b981" : "#ef4444"; // emerald and red
+    const color = isBull ? "#10b981" : "#ef4444";
 
     return (
         <g>
-            {/* Wick */}
-            <line x1={midX} y1={yHigh} x2={midX} y2={yLow} stroke={color} strokeWidth={2} />
-            {/* Body */}
+            <line x1={midX} y1={yHigh} x2={midX} y2={yLow} stroke={color} strokeWidth={1.5} />
             <rect
-                x={x}
+                x={x + 1}
                 y={vTop}
-                width={width}
+                width={Math.max(width - 2, 2)}
                 height={vHeight}
-                fill={isBull ? 'transparent' : color}
+                fill={isBull ? color : color}
+                fillOpacity={isBull ? 0.2 : 0.8}
                 stroke={color}
-                strokeWidth={2}
-                rx={2}
+                strokeWidth={1.5}
+                rx={1}
             />
         </g>
     );
 };
 
-// Custom Tooltip
-const CustomTooltip = ({ active, payload, label }: any) => {
+// Custom Tooltip with story display
+const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload as KlineDataPoint;
         return (
-            <div className="glass p-4 rounded-2xl shadow-xl min-w-[200px]">
-                <p className="font-bold text-lg mb-2">{data.age} 岁</p>
+            <div className="bg-white dark:bg-gray-900 border border-border p-4 rounded-2xl shadow-xl min-w-[220px] max-w-[280px]">
+                <div className="flex items-center gap-2 mb-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${data.isBull ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                    <p className="font-bold text-lg">{data.age} 岁</p>
+                    <span className={`text-xs font-medium ml-auto ${data.isBull ? 'text-emerald-600' : 'text-red-500'}`}>
+                        {data.isBull ? '上升期' : '调整期'}
+                    </span>
+                </div>
                 <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-                    <div className="text-muted-foreground">开局: <span className="text-foreground">{data.open}</span></div>
-                    <div className="text-muted-foreground">结果: <span className="text-foreground">{data.close}</span></div>
-                    <div className="text-muted-foreground">高点: <span className="text-foreground">{data.high}</span></div>
-                    <div className="text-muted-foreground">低点: <span className="text-foreground">{data.low}</span></div>
+                    <div className="text-muted-foreground">开局: <span className="text-foreground font-medium">{data.open}</span></div>
+                    <div className="text-muted-foreground">结果: <span className="text-foreground font-medium">{data.close}</span></div>
+                    <div className="text-muted-foreground">高点: <span className="text-foreground font-medium">{data.high}</span></div>
+                    <div className="text-muted-foreground">低点: <span className="text-foreground font-medium">{data.low}</span></div>
                 </div>
                 {data.milestone && (
                     <div className="mt-2 pt-2 border-t border-border">
-                        <p className="text-xs text-primary font-medium flex items-center gap-2">
+                        <p className="text-xs text-primary font-semibold flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-primary" />
                             {data.milestone}
+                        </p>
+                    </div>
+                )}
+                {data.story && (
+                    <div className={`mt-2 ${data.milestone ? '' : 'pt-2 border-t border-border'}`}>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                            {data.story}
                         </p>
                     </div>
                 )}
@@ -72,7 +90,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function LifeKlineChart({ onBack, onCalculatePartner }: { onBack: () => void, onCalculatePartner: () => void }) {
-    const { userData, reset } = useLifeStore()
+    const { userData } = useLifeStore()
     const [data, setData] = useState<KlineDataPoint[]>([])
     const [isGenerating, setIsGenerating] = useState(true)
 
@@ -137,10 +155,10 @@ export default function LifeKlineChart({ onBack, onCalculatePartner }: { onBack:
 
                 <div className="w-full h-[500px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                        <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 20 }} barCategoryGap="20%">
                             <XAxis
                                 dataKey="age"
-                                tick={{ fill: 'var(--muted-foreground)' }}
+                                tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
                                 axisLine={false}
                                 tickLine={false}
                                 minTickGap={30}
@@ -151,23 +169,20 @@ export default function LifeKlineChart({ onBack, onCalculatePartner }: { onBack:
                             />
                             <Tooltip
                                 content={<CustomTooltip />}
-                                cursor={{ fill: 'var(--border)', opacity: 0.5 }}
+                                cursor={{ fill: 'var(--border)', opacity: 0.3 }}
                             />
-                            <Bar dataKey="close" shape={<Candlestick />} isAnimationActive={true} animationDuration={2000} />
-
-                            {/* Highlight Milestones with ReferenceDots */}
-                            {data.map((d, i) => d.milestone && (
-                                <ReferenceDot
-                                    key={`dot-${i}`}
-                                    x={d.age}
-                                    y={105}
-                                    r={4}
-                                    fill="var(--primary)"
-                                    stroke="none"
-                                />
-                            ))}
+                            <Bar dataKey="close" shape={<Candlestick />} isAnimationActive={false} />
                         </BarChart>
                     </ResponsiveContainer>
+                </div>
+
+                {/* Milestone legend */}
+                <div className="mt-6 flex flex-wrap gap-3 justify-center">
+                    {data.filter(d => d.milestone).map((d, i) => (
+                        <span key={i} className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+                            {d.age}岁 · {d.milestone}
+                        </span>
+                    ))}
                 </div>
             </div>
         </div>

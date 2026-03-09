@@ -6,11 +6,18 @@ import { useLifeStore } from '@/store/useLifeStore'
 import { cn } from '@/lib/utils'
 import { ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
+const traitOptions = [
+    '乐观', '坚韧', '敏感', '冒险', '稳重', '内向',
+    '外向', '创意', '理性', '感性', '自律', '有野心',
+    '善良', '幽默', '独立', '务实', '浪漫', '强势',
+]
+
 const steps = [
     { id: 'start', title: '开启人生测算' },
     { id: 'gender', title: '您的性别' },
     { id: 'birth', title: '出生信息' },
     { id: 'background', title: '原生家庭' },
+    { id: 'traits', title: '你的特质' },
     { id: 'education', title: '教育背景' },
     { id: 'career', title: '当前事业' },
 ]
@@ -148,6 +155,45 @@ export default function OnboardingForm({ onComplete }: { onComplete: () => void 
                             )}
 
                             {currentStep === 4 && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground mb-4">选择最符合你的特质标签（可多选），也可以自己输入</p>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {traitOptions.map(trait => {
+                                            const selected = (userData.traits || '').split('，').filter(Boolean).includes(trait);
+                                            return (
+                                                <button
+                                                    key={trait}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = (userData.traits || '').split('，').filter(Boolean);
+                                                        const next = selected
+                                                            ? current.filter(t => t !== trait)
+                                                            : [...current, trait];
+                                                        setUserData({ traits: next.join('，') });
+                                                    }}
+                                                    className={cn(
+                                                        "px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
+                                                        selected
+                                                            ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                                                            : "border-border hover:border-black/30 dark:hover:border-white/30 text-foreground"
+                                                    )}
+                                                >
+                                                    {trait}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="或自由输入，用逗号分隔：如 细心，有耐心"
+                                        value={userData.traits}
+                                        onChange={e => setUserData({ traits: e.target.value })}
+                                        className="w-full bg-white/50 dark:bg-black/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                                    />
+                                </div>
+                            )}
+
+                            {currentStep === 5 && (
                                 <div className="space-y-6">
                                     <div>
                                         <label className="block text-sm font-medium mb-2 text-muted-foreground">大学所在城市</label>
@@ -172,7 +218,7 @@ export default function OnboardingForm({ onComplete }: { onComplete: () => void 
                                 </div>
                             )}
 
-                            {currentStep === 5 && (
+                            {currentStep === 6 && (
                                 <div className="space-y-6">
                                     <div>
                                         <label className="block text-sm font-medium mb-2 text-muted-foreground">当前工作城市</label>

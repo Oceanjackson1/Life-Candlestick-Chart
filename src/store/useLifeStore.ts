@@ -9,6 +9,7 @@ export interface UserLifeData {
     universityMajor: string;
     currentCity: string;
     currentOccupation: string;
+    traits: string;
 }
 
 interface LifeStore {
@@ -28,6 +29,7 @@ const initialUserData: UserLifeData = {
     universityMajor: '',
     currentCity: '',
     currentOccupation: '',
+    traits: '',
 }
 
 export const useLifeStore = create<LifeStore>((set) => ({

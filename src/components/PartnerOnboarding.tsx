@@ -149,6 +149,11 @@ export default function PartnerOnboarding({ onComplete, onCancel }: { onComplete
                     </motion.div>
                 </AnimatePresence>
             </div>
+
+            {/* Made By Ocean Signature */}
+            <div className="mt-12 text-center text-sm font-medium text-muted-foreground tracking-widest opacity-60">
+                MADE BY OCEAN
+            </div>
         </div>
     )
 }

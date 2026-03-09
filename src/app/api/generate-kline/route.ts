@@ -11,22 +11,24 @@ export async function POST(req: Request) {
 
         const systemPrompt = `你是一个人生规划大师与命理推演专家。你需要把用户的一生（0岁-80岁）抽象成炒股的K线数据。
 用户会提供他们的性别、出生年份、城市、家庭背景、大学及专业、工作地和岗位信息。
-请根据这些信息，推演其0-80岁每年的人生走向（包括低谷、起伏和巅峰）。
+你需要：
+1. 复盘他们的过去：根据年龄和经历生成过去的 K 线波动。
+2. 预测他们的未来轨迹：结合当前的信息，在剩余的年龄里（直到 80 岁）合理推理并预测他们未来的人生走向（高潮、低谷、机遇或危机），体现在运势分数（0-100）上。
 
-请严格只返回一段 JSON 格式的数据（不要包含任何其他说明文字或 Markdown 标记 \`\`\`json ），它必须是一个包含 81 个对象的数组。每个对象对应0到了80岁的每年数据，其接口类型为：
-[{
-  "age": number, // 0 到 80
-  "open": number, // 0-100 的数值，表示该岁开始时的运势
-  "close": number, // 0-100，结束时的运势
-  "high": number, // 0-100，这一年的波段巅峰
-  "low": number, // 0-100，波段谷底
-  "milestone": string | undefined, // 如果这一年有重大事件（如："考入大学", "职场晋升"），写在这里，否则留空
-  "isBull": boolean // 如果 close >= open 则为 true，否则为 false
-}]
+请严格并且只返回一段包含 81 个对象的 JSON 数组，不需要输出多余的Markdown说明，格式必须直接是一个纯数组：
+[
+    {
+      "age": number, // 0 到 80
+      "open": number, // 0-100 的数值，该岁开始时的运势
+      "close": number, // 0-100，结束时的运势
+      "high": number, // 0-100，波段巅峰
+      "low": number, // 0-100，波段谷底
+      "milestone": string, // 如果这一年有重大事件（无论是过去的事件，还是未来的预测事件如"创业失败", "移民海外"），写在这里，否则留空字符串 ""
+      "isBull": boolean // 如果 close >= open 则为 true，否则为 false
+    }
+]
 
-注意：
-1. 请根据你拥有的行业知识和用户背景，合理虚构他们可能遇到的人生拐点、危机与机遇，体现在分数（0-100）的波动上。
-2. 数据务必连贯，上一年的 close 应该和下一年的 open 较近。`;
+请确保生成严格连贯、带有戏剧性起伏的 81 年数据，并用真实感极强的 milestone 预测未来。`;
 
         const userContent = JSON.stringify(userData);
 
@@ -42,9 +44,8 @@ export async function POST(req: Request) {
                     { role: "system", content: systemPrompt },
                     { role: "user", content: userContent }
                 ],
-                temperature: 0.7,
-                max_tokens: 4000,
-                response_format: { type: "json_object" }
+                temperature: 0.8,
+                max_tokens: 8000
             })
         });
 
@@ -57,21 +58,20 @@ export async function POST(req: Request) {
         const aiData = await response.json();
         const content = aiData.choices[0].message.content;
 
-        // Attempt to parse the JSON string from AI
+        // Extract JSON array robustly via regex matching the brackets 
         let parsedData = [];
         try {
-            parsedData = JSON.parse(content);
-            // Deepseek might wrap in an object for json_object type like { "data": [...] }
-            if (parsedData.data && Array.isArray(parsedData.data)) {
-                parsedData = parsedData.data;
-            } else if (parsedData.kline && Array.isArray(parsedData.kline)) {
-                parsedData = parsedData.kline;
+            const match = content.match(/\[([\s\S]*?)\]/);
+            if (match) {
+                parsedData = JSON.parse(`[${match[1]}]`);
+            } else {
+                parsedData = JSON.parse(content);
             }
+            if (parsedData.data && Array.isArray(parsedData.data)) parsedData = parsedData.data;
         } catch (e) {
-            // Fallback or cleanup markdown
+            console.error("Failed to parse Deepseek response content:", content);
             const cleaned = content.replace(/```json/g, '').replace(/```/g, '').trim();
             parsedData = JSON.parse(cleaned);
-            if (parsedData.data && Array.isArray(parsedData.data)) parsedData = parsedData.data;
         }
 
         return NextResponse.json(parsedData);

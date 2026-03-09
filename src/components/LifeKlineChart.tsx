@@ -77,12 +77,22 @@ export default function LifeKlineChart({ onBack, onCalculatePartner }: { onBack:
     const [isGenerating, setIsGenerating] = useState(true)
 
     useEffect(() => {
-        // Simulate AI generation time for UX
-        const timer = setTimeout(() => {
-            setData(generateLifeData(userData));
-            setIsGenerating(false);
-        }, 2000);
-        return () => clearTimeout(timer);
+        let mounted = true;
+        const fetchData = async () => {
+            setIsGenerating(true);
+            try {
+                const generated = await generateLifeData(userData);
+                if (mounted) {
+                    setData(generated);
+                    setIsGenerating(false);
+                }
+            } catch (e) {
+                console.error("Error generating data", e);
+                if (mounted) setIsGenerating(false);
+            }
+        };
+        fetchData();
+        return () => { mounted = false; };
     }, [userData])
 
     if (isGenerating) {

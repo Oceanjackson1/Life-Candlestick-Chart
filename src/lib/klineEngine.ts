@@ -23,7 +23,31 @@ function seededRandom(seed: number) {
     return x - Math.floor(x);
 }
 
-export function generateLifeData(user: Partial<UserLifeData>): KlineDataPoint[] {
+export async function generateLifeData(user: Partial<UserLifeData>): Promise<KlineDataPoint[]> {
+    try {
+        const res = await fetch('/api/generate-kline', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userData: user })
+        });
+
+        if (!res.ok) {
+            console.warn("API Error, falling back to local simulation.");
+            return generateMockLifeData(user);
+        }
+
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+            return data;
+        }
+        return generateMockLifeData(user);
+    } catch (error) {
+        console.error("Network Fetch Error, falling back to local simulation.", error);
+        return generateMockLifeData(user);
+    }
+}
+
+export function generateMockLifeData(user: Partial<UserLifeData>): KlineDataPoint[] {
     const data: KlineDataPoint[] = [];
     let currentFortune = 50;
 

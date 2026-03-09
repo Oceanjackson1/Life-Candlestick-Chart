@@ -37,21 +37,33 @@ export default function MatchChart({ onBack }: { onBack: () => void }) {
     const [isGenerating, setIsGenerating] = useState(true)
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            const d1 = generateLifeData(userData);
-            const d2 = generateLifeData(partnerData);
+        let mounted = true;
+        const fetchMatch = async () => {
+            setIsGenerating(true);
+            try {
+                const [d1, d2] = await Promise.all([
+                    generateLifeData(userData),
+                    generateLifeData(partnerData)
+                ]);
 
-            const merged = d1.map((p, i) => ({
-                age: p.age,
-                user1: p.close,
-                user2: d2[i]?.close || 50
-            }));
+                if (!mounted) return;
 
-            setData(merged);
-            setResult(calculateMatchScore(d1, d2));
-            setIsGenerating(false);
-        }, 2500);
-        return () => clearTimeout(timer);
+                const merged = d1.map((p, i) => ({
+                    age: p.age,
+                    user1: p.close,
+                    user2: d2[i]?.close || 50
+                }));
+
+                setData(merged);
+                setResult(calculateMatchScore(d1, d2));
+                setIsGenerating(false);
+            } catch (e) {
+                console.error(e);
+                if (mounted) setIsGenerating(false);
+            }
+        };
+        fetchMatch();
+        return () => { mounted = false; };
     }, [userData, partnerData])
 
     if (isGenerating) {

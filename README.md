@@ -49,9 +49,15 @@ npm run dev
 
 ## 🌐 部署 (Deployment)
 
-得益于全客户端渲染与 Zustand 内存级存储设计，本应用**无需**挂载任何数据库 (如 Supabase/PostgreSQL) 即插即用。完全满足“免登录、用后即走”的极简安全诉求。
+得益于全客户端渲染与 Zustand 内存级存储设计，本应用**无需**挂载任何数据库 (如 Supabase/PostgreSQL)。为了保护您的 Deepseek API Key 不被泄露，应用内所有的 AI 分析均通过安全的 Serverless API Route 代理转发请求。
 
-推荐直接将代码 Import 到 **[Vercel](https://vercel.com/)**，实现零配置、一键极速部署。
+推荐直接将代码 Import 到 **[Vercel](https://vercel.com/)**，实现快速部署：
+
+1. 在 Vercel 导入该 GitHub 仓库。
+2. 在 **Environment Variables** (环境变量) 设置中，添加您自己的 API 原生密钥：
+   - Name: `DEEPSEEK_API_KEY`
+   - Value: `sk-589ae78...` (填入真实的 Key)
+3. 点击 Deploy，等待数十秒即可上线！
 
 ---
 

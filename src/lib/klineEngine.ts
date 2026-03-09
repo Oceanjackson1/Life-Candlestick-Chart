@@ -24,13 +24,11 @@ function seededRandom(seed: number) {
     return x - Math.floor(x);
 }
 
-// Parse traits string into trait keywords
 function parseTraits(traits: string): string[] {
     if (!traits) return [];
     return traits.split(/[,，、\s]+/).filter(t => t.trim().length > 0).map(t => t.trim());
 }
 
-// Trait effects on volatility and trend
 function getTraitModifiers(traits: string[]): { volatilityMod: number; trendMod: number } {
     let volatilityMod = 0;
     let trendMod = 0;
@@ -61,144 +59,221 @@ function getTraitModifiers(traits: string[]): { volatilityMod: number; trendMod:
     return { volatilityMod, trendMod };
 }
 
-// Story templates for different life phases
-const earlyChildhoodStories = {
-    bull: [
-        '在家庭的温暖中快乐成长',
-        '展现出超越同龄人的天赋',
-        '结交了童年最好的朋友',
-        '在兴趣班中发现了自己的热爱',
-        '得到了一份珍贵的生日礼物',
-    ],
-    bear: [
-        '第一次感受到与小伙伴的分离',
-        '经历了一次小小的挫折',
-        '对未知世界产生了困惑',
-        '身体出现了一些小状况',
-        '开始体会到成长的烦恼',
-    ]
-};
-
-const schoolStories = {
-    bull: [
-        '成绩有了明显进步，获得了老师的赞赏',
-        '在学校活动中崭露头角',
-        '找到了自己擅长的学科方向',
-        '和志同道合的朋友组成了小团队',
-        '获得了一个重要的奖项或荣誉',
-        '在竞赛中取得了好成绩',
-    ],
-    bear: [
-        '面临考试的压力，成绩波动',
-        '与好朋友产生了误会',
-        '对未来的方向感到迷茫',
-        '经历了一次重要考试的失利',
-        '青春期的困惑开始显现',
-        '学业压力让人喘不过气',
-    ]
-};
-
-const universityStories = (city: string, major: string) => ({
-    bull: [
-        city ? `在${city}的大学生活充满了新鲜感` : '大学生活开启了全新篇章',
-        major ? `在${major}领域找到了真正的热情` : '在专业领域找到了方向',
-        '加入了一个改变人生轨迹的社团',
-        '遇到了一位影响深远的导师',
-        '第一次独立完成了一个重要项目',
-        '在校园里收获了一段美好的感情',
-    ],
-    bear: [
-        '初次离家的孤独感袭来',
-        major ? `发现${major}并不完全是自己想象的样子` : '专业方向和预期产生了偏差',
-        '社交圈的重建让人感到疲惫',
-        '面临人生第一次重大选择的焦虑',
-        '经济上开始需要自己操心',
-        '一段感情的结束带来了成长的痛',
-    ]
-});
-
-const earlyCareerStories = (occupation: string, city: string) => ({
-    bull: [
-        occupation ? `初入${occupation}行业，展现出了不错的潜力` : '在职场中站稳了脚跟',
-        city ? `在${city}找到了属于自己的节奏` : '逐渐适应了都市的快节奏',
-        '获得了第一次晋升或加薪',
-        '建立了有价值的职业人脉',
-        '工作中的一个突破获得了上级认可',
-        '经济开始独立，有了安全感',
-    ],
-    bear: [
-        occupation ? `${occupation}的现实和理想差距不小` : '职场的残酷让人清醒',
-        '加班和压力成为了日常',
-        '第一次体验到职场的不公',
-        '租房搬家的疲惫消磨着热情',
-        '工作和生活的平衡开始失控',
-        city ? `${city}的生活成本让人倍感压力` : '大城市的生活成本压得喘不过气',
-    ]
-});
-
-const midCareerStories = (occupation: string) => ({
-    bull: [
-        '事业进入了稳步上升期',
-        occupation ? `在${occupation}领域积累了核心竞争力` : '专业能力得到了广泛认可',
-        '迎来了一个重要的事业转折点',
-        '投资或副业开始有了回报',
-        '在行业内建立了一定的影响力',
-        '找到了工作与生活的平衡点',
-        '家庭生活带来了温暖和力量',
-    ],
-    bear: [
-        '中年危机的焦虑悄然而至',
-        '行业变革带来了不确定性',
-        '身体发出了需要关注的信号',
-        '家庭和事业的矛盾加剧',
-        '同龄人的成就带来了比较的压力',
-        '一次投资失误造成了经济损失',
-        '感觉自己被新生力量超越',
-    ]
-});
-
-const lateCareerStories = {
-    bull: [
-        '人生阅历成为了最宝贵的财富',
-        '终于到达了曾经仰望的高度',
-        '开始有能力回馈社会和家庭',
-        '多年的坚持终于开花结果',
-        '子女的成长带来了由衷的欣慰',
-        '对生活有了更深的感悟和从容',
-    ],
-    bear: [
-        '身体机能的下降成为不可忽视的问题',
-        '对退休后的生活感到不安',
-        '送别了一位重要的人',
-        '面对衰老的恐惧变得真实',
-        '回首往事，对某些选择感到遗憾',
-        '生活节奏的改变需要重新适应',
-    ]
-};
-
-const retirementStories = {
-    bull: [
-        '退休后的生活比想象中更加精彩',
-        '终于有时间追求年轻时的梦想',
-        '成为了家族中被敬重的长者',
-        '旅行让晚年生活充满了色彩',
-        '与老伴共度的时光格外珍贵',
-        '用一生的智慧影响着下一代',
-    ],
-    bear: [
-        '退休后的空虚感需要时间适应',
-        '健康问题增多，需要更多关注',
-        '社交圈的缩小让人感到孤独',
-        '对过去的遗憾偶尔浮上心头',
-        '身体不如从前，力不从心',
-        '生活节奏骤变带来了失落感',
-    ]
-};
-
 function pickStory(stories: string[], seed: number): string {
     const idx = Math.floor(seededRandom(seed) * stories.length);
     return stories[idx];
 }
+
+// ========== Detailed story templates per life phase ==========
+
+const babyStories = {
+    bull: [
+        '在父母的期待中降生，全家欢喜。第一声啼哭响亮有力，仿佛预示着不平凡的一生',
+        '比同龄宝宝更早学会走路，妈妈欣喜地记录下这珍贵的一刻',
+        '爷爷奶奶特别宠爱，在充满爱的家庭氛围中健康成长',
+    ],
+    bear: [
+        '出生时体重偏轻，在保温箱里度过了最初的几天，让全家人揪心不已',
+        '半夜频繁哭闹，父母轮流抱着哄睡，疲惫却又心疼',
+        '一次高烧让全家手忙脚乱，好在最终化险为夷',
+    ]
+};
+
+const kindergartenStories = {
+    bull: [
+        '第一天上幼儿园没有哭，反而兴奋地拉着小朋友的手。老师说这孩子天生自来熟',
+        '在六一儿童节的舞台上表演节目，虽然忘了两句台词，但笑容打动了所有家长',
+        '画的一幅画被贴在幼儿园走廊上展示，这是人生中第一次获得"公开认可"',
+        '交到了人生中第一个"铁哥们"，两个人形影不离，连家长都成了朋友',
+    ],
+    bear: [
+        '和小朋友抢玩具被推倒，哭着回家。第一次体会到"竞争"的滋味',
+        '不愿意午睡，总是偷偷睁着眼睛看天花板，想着外面的世界',
+        '搬家换了一所幼儿园，在新环境里沉默了整整两个星期',
+        '最好的朋友转学了，趴在窗户上看了很久很久',
+    ]
+};
+
+const primarySchoolStories = {
+    bull: [
+        '第一次考试拿了满分，小心翼翼地把试卷折好装进书包，回家路上忍不住偷看了三次',
+        '被选为班长，站在讲台上管纪律时紧张得声音发抖，但同学们都很配合',
+        '在作文比赛中获奖，语文老师在全班面前朗读了自己的文章，脸红到了耳朵根',
+        '参加学校运动会拿了名次，第一次站上领奖台的感觉刻骨铭心',
+        '偶然发现了一本改变自己阅读兴趣的书，从此打开了一个新世界的大门',
+    ],
+    bear: [
+        '数学考试不及格，回家路上在楼道里坐了半小时才敢敲门',
+        '被同学起了难听的外号，虽然表面笑着，晚上却偷偷哭了',
+        '父母吵架的声音穿过卧室门，蒙着被子假装听不见，这一夜似乎突然长大了',
+        '近视了，戴上眼镜的那天觉得全世界都不一样了，也开始在意别人的目光',
+        '最好的朋友和别人玩在了一起，第一次体会到被"抛弃"的感觉',
+    ]
+};
+
+const middleSchoolStories = {
+    bull: [
+        '进入了不错的初中，新环境激发了前所未有的学习动力，成绩一路上升',
+        '在班级文艺汇演中意外发现了自己的才艺天赋，从此多了一个闪光点',
+        '遇到了一位改变自己人生观的班主任，那些课后谈话至今记忆犹新',
+        '第一次代表学校参加竞赛，虽然紧张到手抖，但结果出乎意料的好',
+        '暗恋了一个同学，每天上学的路突然变得充满期待',
+    ],
+    bear: [
+        '进入青春期，和父母的关系变得紧张，摔门和沉默成了日常',
+        '中考的压力像一座山，每天刷题到深夜，做梦都是数学公式',
+        '和好朋友因为一件小事决裂，冷战了一整个学期',
+        '成绩突然滑坡，老师找家长谈话，那天回家的路格外漫长',
+        '第一次意识到家庭经济状况和别人不一样，心里有了说不出的复杂感受',
+    ]
+};
+
+const highSchoolStories = {
+    bull: [
+        '考进了理想的高中，分班考试发挥出色，进了重点班',
+        '参加学科竞赛拿到了省级奖项，保送的希望似乎近在咫尺',
+        '高二那年突然开窍，成绩从中游一跃成为年级前列',
+        '和同桌成为了最好的朋友，一起熬过的那些晚自习成了青春里最温暖的记忆',
+        '在校运会上破了学校纪录，那一刻感觉自己无所不能',
+    ],
+    bear: [
+        '高一的第一次月考就跌出了预期，高中和初中完全不是一个量级',
+        '失眠开始频繁出现，凌晨三点看着天花板发呆，焦虑像潮水一样涌来',
+        '暗恋的人和别人在一起了，那段时间上课完全无法集中注意力',
+        '一模成绩出来，离目标院校的分数线差了整整50分，绝望感前所未有',
+        '和父母因为志愿填报大吵一架，觉得没有人真正理解自己',
+    ]
+};
+
+const universityStoriesGen = (city: string, major: string) => ({
+    bull: [
+        city ? `拖着行李箱走进${city}的大学校园，一切都是崭新的。室友们来自五湖四海，第一晚聊到了凌晨三点` : '踏入大学校园的那一刻，感觉整个世界都被打开了',
+        major ? `在${major}的课堂上找到了真正的热情，教授的一句话点燃了内心的火焰` : '选修了一门改变认知的课程，从此确定了未来的方向',
+        '加入了一个社团，认识了一群志同道合的人。那些通宵排练的夜晚，是青春最热烈的注脚',
+        '大二暑假拿到了第一份实习，虽然工资微薄，但第一次靠自己赚钱的成就感无与伦比',
+        '在校园里遇到了一个特别的人，心跳加速的感觉让整个秋天都变得温柔',
+        '毕业论文获得了优秀，答辩那天指导老师说"你比我当年强"，这句话记了很多年',
+        '大学期间去了一次长途旅行，在路上重新认识了自己',
+    ],
+    bear: [
+        city ? `初到${city}，水土不服加上想家，独自在宿舍楼道里打了二十分钟电话` : '第一次离开家乡，孤独感在夜深人静时格外清晰',
+        major ? `发现${major}和想象中完全不同，挂科的红灯让人开始怀疑当初的选择` : '对自己的专业产生了深深的怀疑，但转专业的勇气还没攒够',
+        '一段认真的感情以分手告终，那个冬天格外漫长',
+        '室友关系出了问题，每天回宿舍都要深呼吸三次',
+        '参加了无数场招聘会，简历投了上百份，回复却寥寥无几。秋招的焦虑弥漫在整个毕业季',
+        '考研失利，看着别人收到录取通知书，内心五味杂陈',
+    ]
+});
+
+const earlyCareerStoriesGen = (occupation: string, city: string) => ({
+    bull: [
+        occupation ? `正式入职${occupation}岗位，虽然从最基础的活干起，但每天都在飞速成长` : '入职第一天，紧张又兴奋，像是推开了人生新章节的大门',
+        city ? `在${city}租了一间小小的房子，下班后对着窗外的灯火，觉得这座城市终于有了自己的位置` : '终于有了属于自己的小窝，虽然不大，但每一件家具都是自己挑的',
+        '第一个独立完成的项目获得了客户好评，领导在周会上点名表扬',
+        '遇到了职业生涯中的第一位贵人，一次偶然的对话改变了此后的发展轨迹',
+        '年终考核拿到了超预期的奖金，请朋友们吃了一顿大餐',
+        '谈了一场认真的恋爱，两个人一起逛超市、做饭、规划未来，平淡却很踏实',
+        occupation ? `在${occupation}领域开始崭露头角，收到了猎头的第一通电话` : '开始在行业内有了一些名气，LinkedIn 上的连接请求越来越多',
+    ],
+    bear: [
+        occupation ? `${occupation}行业的现实比想象中残酷得多，加班到凌晨是常态，理想和现实的落差让人喘不过气` : '职场新人的处境比想象中艰难，被甲方连续退回方案三次后，在卫生间里崩溃了五分钟',
+        city ? `${city}的房租又涨了，算了算这个月的开支，发现存款又缩水了` : '月底看了一眼银行卡余额，沉默了很久',
+        '第一次被裁员/被迫离职，收拾工位的那天假装很淡定，出了公司大门才红了眼眶',
+        '连续相亲了好几次，没有一个聊得来的。父母的催促和自己的孤独感交织在一起',
+        '身体第一次亮起了红灯，医生说要注意休息，但手上的项目根本停不下来',
+        '最好的朋友结婚了，参加婚礼时笑着祝福，回到出租屋后觉得有点落寞',
+    ]
+});
+
+const marriageStories = {
+    bull: [
+        '在一个普通的周末向对方求婚了。虽然没有钻戒和鲜花，但ta的眼泪就是最好的回答',
+        '婚礼那天，看到父母欣慰的笑容，突然觉得自己真的长大了',
+        '蜜月旅行去了一直想去的地方，牵着手走过的那些路，变成了共同的记忆',
+    ],
+    bear: [
+        '婚后的生活和恋爱时很不一样，柴米油盐的磨合比想象中更考验耐心',
+        '因为婆媳/翁婿关系产生了不少摩擦，夹在中间左右为难',
+        '婚后第一次大吵架，摔门而出在楼下坐了一个小时',
+    ]
+};
+
+const parentingStories = {
+    bull: [
+        '孩子出生了，第一次抱起那个小小的生命，感觉整个世界的重量都在怀里。从此有了软肋，也有了铠甲',
+        '孩子叫出第一声"爸爸/妈妈"的那天，所有的疲惫都值了',
+        '带孩子去了游乐场，看着ta开心地奔跑，忽然理解了父母当年的心情',
+    ],
+    bear: [
+        '孩子半夜发高烧，抱着往医院冲的路上，人生第一次感受到那种刻骨的无助',
+        '工作和育儿的冲突让人焦头烂额，觉得自己什么角色都没演好',
+        '教育理念和另一半产生了分歧，关于孩子的问题成了家里最敏感的话题',
+    ]
+};
+
+const midCareerStoriesGen = (occupation: string) => ({
+    bull: [
+        occupation ? `在${occupation}领域深耕多年，终于等到了那个"质变"的机会。一个重大项目的成功让事业迈上新台阶` : '厚积薄发，多年的积累在这一年集中爆发，事业迎来了真正的上升期',
+        '完成了一次重要的职级晋升，站在新的高度看到了不一样的风景',
+        '开始带团队了。从个人贡献者到管理者的转变充满挑战，但也收获了新的成就感',
+        '投资的一个项目开始盈利，被动收入第一次超过了一万块',
+        '买了人生中第一套自己的房子。拿到钥匙的那天，在空荡荡的客厅里站了很久',
+        occupation ? `收到了${occupation}行业顶级公司的邀约，纠结了一周后决定接受新挑战` : '一个意想不到的机会从天而降，果断抓住后人生轨迹发生了转折',
+        '孩子在学校拿了第一名，看着成绩单觉得这些年的付出都有了意义',
+        '全家一起出国旅行，在异国的街头发现生活原来可以有很多种可能',
+    ],
+    bear: [
+        '35岁生日那天，突然意识到自己已经不再年轻了。看着镜子里的白发，中年危机不请自来',
+        '公司大规模裁员，虽然这次没轮到自己，但那种不安全感如影随形',
+        occupation ? `${occupation}行业正在经历剧变，AI和新技术的冲击让人不得不重新思考自己的价值` : '行业的变化比预想中快得多，曾经引以为傲的技能似乎正在贬值',
+        '体检报告上第一次出现了需要复查的指标，开始认真思考健康问题',
+        '父母的身体开始出现问题，频繁往返于医院的日子让人身心俱疲',
+        '一次错误的投资决策导致了不小的经济损失，好几个月都睡不好觉',
+        '夫妻关系进入了倦怠期，两个人坐在同一张沙发上却各看各的手机',
+        '孩子进入了叛逆期，一句"你不懂我"像刀子一样扎在心上',
+        '发现自己的收入增长已经赶不上同龄人了，焦虑感在深夜特别强烈',
+    ]
+});
+
+const lateCareerStoriesGen = {
+    bull: [
+        '在行业里终于有了真正的话语权，年轻人开始叫自己"老师"，这个称呼带着沉甸甸的分量',
+        '孩子考上了不错的大学，送ta去学校的路上，想起了当年父母送自己的场景',
+        '事业上积累的财富终于让自己可以不再为钱焦虑，开始思考人生更深层的意义',
+        '和老朋友重聚，聊起年少时的梦想，发现有些居然真的实现了',
+        '开始做一些公益的事情，用自己的经验帮助年轻人少走弯路',
+        '50岁生日那天收到了孩子写的一封长信，哭得像个孩子',
+        '重新拾起了年轻时放弃的爱好，发现人生什么时候开始都不晚',
+    ],
+    bear: [
+        '参加了一位老同事的葬礼，生命的脆弱第一次如此真实地击中了自己',
+        '膝盖开始疼了，爬楼梯时不自觉地扶着扶手。身体在提醒：你不再年轻了',
+        '孩子工作后去了远方的城市，家里突然空了，"空巢"的滋味比想象中难受',
+        '公司里越来越多年轻面孔，开会时偶尔听不懂他们的术语，有种被时代抛下的恐惧',
+        '一场突如其来的疾病打乱了所有计划，住院的日子里重新排列了人生的优先级',
+        '回老家发现儿时的街道已经面目全非，熟悉的人越来越少了',
+        '父母相继离世，人生中最坚固的靠山消失了，第一次真正成为了"大人"',
+    ]
+};
+
+const retirementStoriesGen = {
+    bull: [
+        '退休第一天，睡到自然醒，泡了一杯茶，在阳台上坐了一整个上午。原来慢下来的感觉这么好',
+        '和老伴报名了一个老年大学的课程，重新当学生的感觉居然还挺新鲜',
+        '带着孙子/孙女去公园，那双小手牵着自己的手指，心里涌起一种奇妙的温暖',
+        '终于实现了环游世界的梦想，在巴黎的塞纳河边发了一条朋友圈：来得虽晚，但终究来了',
+        '写了一本回忆录，虽然不打算出版，但把这一生的故事留下来，觉得很满足',
+        '金婚纪念日，孩子们从各地赶回来庆祝，看着满桌的笑脸，觉得这辈子值了',
+    ],
+    bear: [
+        '退休后的生活远没有想象中精彩，没有了工作的节奏，每一天都变得漫长',
+        '一次跌倒导致了骨折，在床上躺了两个月。衰老的感觉从未如此具体',
+        '老伴的记忆开始模糊，有时候叫不出自己的名字，每一次都心如刀割',
+        '翻看年轻时的照片，那些人、那些事、那些选择——如果重来一次，会不会不一样？',
+        '孩子们都忙着自己的生活，电话越来越短，越来越少。理解他们，但还是觉得孤独',
+        '身体的零件一个接一个地出问题，药盒里的药越来越多，这就是晚年的日常',
+    ]
+};
 
 // Async version that calls Deepseek API first, falls back to local mock
 export async function generateLifeData(user: Partial<UserLifeData>): Promise<KlineDataPoint[]> {
@@ -232,111 +307,164 @@ export function generateMockLifeData(user: Partial<UserLifeData>): KlineDataPoin
     const traits = parseTraits(user.traits || '');
     const { volatilityMod, trendMod } = getTraitModifiers(traits);
 
-    const strToSeed = `${user.birthYear || ''}${user.birthCity || ''}${user.universityCity || ''}${user.traits || ''}`;
+    const strToSeed = `${user.birthYear || ''}${user.birthCity || ''}${user.universityCity || ''}${user.traits || ''}${user.name || ''}`;
     let seed = 1990;
     for (let i = 0; i < strToSeed.length; i++) {
         seed += strToSeed.charCodeAt(i) * (i + 1);
     }
 
-    const uniStories = universityStories(user.universityCity || '', user.universityMajor || '');
-    const earlyCareer = earlyCareerStories(user.currentOccupation || '', user.currentCity || '');
-    const midCareer = midCareerStories(user.currentOccupation || '');
+    const uniStories = universityStoriesGen(user.universityCity || '', user.universityMajor || '');
+    const earlyCareer = earlyCareerStoriesGen(user.currentOccupation || '', user.currentCity || '');
+    const midCareer = midCareerStoriesGen(user.currentOccupation || '');
 
+    // Story at almost every 2 years, more dense than before
     const storyAges = new Set([
-        0, 3, 6, 10, 14, 18, 22, 24, 27, 30,
-        33, 36, 40, 45, 50, 55, 60, 65, 70, 75, 80
+        0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 19, 20, 22,
+        23, 24, 25, 27, 28, 30, 32, 34, 35, 37, 39, 40,
+        42, 44, 45, 47, 50, 52, 55, 57, 60, 63, 65, 68, 70, 73, 75, 78, 80
     ]);
 
+    // Major life event triggers (add dramatic spikes)
+    const dramaticEvents: Record<number, { trend: number; vol: number; milestone: string }> = {};
+
+    // University entrance
+    if (user.universityCity) {
+        dramaticEvents[18] = { trend: 15, vol: 8, milestone: `高考放榜 · 考入${user.universityCity}的大学` };
+    }
+    // Graduation
+    if (user.universityMajor) {
+        dramaticEvents[22] = { trend: -5, vol: 12, milestone: `${user.universityMajor}毕业 · 告别校园` };
+    }
+    // First job
+    if (user.currentOccupation) {
+        dramaticEvents[23] = { trend: 8, vol: 15, milestone: `第一份${user.currentOccupation}工作` };
+    }
+    // Career setback (seeded)
+    const setbackAge = 25 + Math.floor(seededRandom(seed + 100) * 4);
+    dramaticEvents[setbackAge] = { trend: -18, vol: 22, milestone: '遭遇重大挫折' };
+    // Love/Marriage
+    const marriageAge = 26 + Math.floor(seededRandom(seed + 200) * 6);
+    dramaticEvents[marriageAge] = { trend: 12, vol: 10, milestone: '步入婚姻殿堂' };
+    // First child
+    const childAge = marriageAge + 1 + Math.floor(seededRandom(seed + 300) * 3);
+    if (childAge <= 38) {
+        dramaticEvents[childAge] = { trend: 10, vol: 14, milestone: '迎来新生命' };
+    }
+    // Career peak
+    if (user.currentCity) {
+        dramaticEvents[35] = { trend: 15, vol: 10, milestone: `事业突破 · 在${user.currentCity}站稳脚跟` };
+    }
+    // Mid-life crisis
+    dramaticEvents[40] = { trend: -12, vol: 18, milestone: '不惑之年 · 中年转折' };
+    // Health scare
+    const healthAge = 45 + Math.floor(seededRandom(seed + 400) * 8);
+    dramaticEvents[healthAge] = { trend: -15, vol: 16, milestone: '健康亮起红灯' };
+    // Child leaving home
+    if (childAge && childAge + 18 <= 75) {
+        dramaticEvents[childAge + 18] = { trend: -5, vol: 10, milestone: '孩子远行 · 空巢' };
+    }
+    // Retirement
+    dramaticEvents[60] = { trend: 8, vol: 8, milestone: '花甲之年 · 退休' };
+    // Golden years event
+    dramaticEvents[70] = { trend: -8, vol: 12, milestone: '古稀之年' };
+
     for (let age = 0; age <= 80; age++) {
-        let trend = 0 + trendMod * 0.3;
-        let volatility = 10 + volatilityMod * 0.5;
+        let trend = trendMod * 0.3;
+        let volatility = 15 + volatilityMod * 0.5; // Base volatility increased from 10 to 15
         let milestone: string | undefined = undefined;
         let story: string | undefined = undefined;
 
-        // Life phase modifiers
+        // Life phase base volatility (all increased)
         if (age < 6) {
-            volatility = 6 + volatilityMod * 0.2;
-            trend = 2;
-        } else if (age >= 6 && age < 12) {
-            volatility = 8;
-            trend = 1;
-        } else if (age >= 12 && age < 18) {
-            volatility = 12 + volatilityMod * 0.3;
-            trend = 0;
-        } else if (age >= 18 && age < 23) {
-            volatility = 14 + volatilityMod * 0.4;
-            trend = 3 + trendMod * 0.5;
-        } else if (age >= 23 && age < 30) {
-            volatility = 16 + volatilityMod * 0.6;
-            trend = 1 + trendMod * 0.4;
-        } else if (age >= 30 && age < 40) {
-            volatility = 14 + volatilityMod * 0.5;
-            trend = 2 + trendMod * 0.3;
-        } else if (age >= 40 && age < 50) {
-            volatility = 12 + volatilityMod * 0.4;
-            trend = -1 + trendMod * 0.3;
-        } else if (age >= 50 && age < 60) {
             volatility = 10 + volatilityMod * 0.3;
+            trend = 3;
+        } else if (age < 12) {
+            volatility = 14 + volatilityMod * 0.3;
+            trend = 1;
+        } else if (age < 18) {
+            volatility = 18 + volatilityMod * 0.4;
+            trend = 0;
+        } else if (age < 23) {
+            volatility = 22 + volatilityMod * 0.5;
+            trend = 2 + trendMod * 0.5;
+        } else if (age < 30) {
+            volatility = 25 + volatilityMod * 0.7;
+            trend = 1 + trendMod * 0.4;
+        } else if (age < 40) {
+            volatility = 22 + volatilityMod * 0.6;
+            trend = 2 + trendMod * 0.3;
+        } else if (age < 50) {
+            volatility = 20 + volatilityMod * 0.5;
+            trend = -1 + trendMod * 0.3;
+        } else if (age < 60) {
+            volatility = 16 + volatilityMod * 0.4;
             trend = 0 + trendMod * 0.2;
-        } else if (age >= 60) {
-            volatility = 7 + volatilityMod * 0.2;
+        } else {
+            volatility = 12 + volatilityMod * 0.3;
             trend = 1;
         }
 
-        // Key milestones
-        if (age === 18 && user.universityCity) {
-            trend += 12;
-            milestone = `考入大学 · ${user.universityCity}`;
-        } else if (age === 22 && user.universityMajor) {
-            trend += 5;
-            milestone = `${user.universityMajor}毕业`;
-        } else if (age === 24 && user.currentOccupation) {
-            trend -= 3;
-            volatility += 8;
-            milestone = `踏入${user.currentOccupation}行业`;
-        } else if (age === 30 && user.currentCity) {
-            trend += 8;
-            milestone = `在${user.currentCity}扎根`;
-        } else if (age === 40) {
-            trend -= 3;
-            volatility += 5;
-            milestone = '不惑之年';
-        } else if (age === 50) {
-            trend += 2;
-            milestone = '知天命';
-        } else if (age === 60) {
-            trend += 5;
-            volatility -= 3;
-            milestone = '花甲之年';
+        // Apply dramatic events
+        const event = dramaticEvents[age];
+        if (event) {
+            trend += event.trend;
+            volatility += event.vol;
+            milestone = event.milestone;
         }
 
+        // Extra random spikes for drama (every ~7 years a surprise event)
+        if (!event && seededRandom(seed + age * 7) > 0.85) {
+            const spike = (seededRandom(seed + age * 13) - 0.5) * 25;
+            trend += spike;
+            volatility += 8;
+        }
+
+        // Calculate Candlestick values with more volatility
         const change = (seededRandom(seed++) - 0.5) * volatility + trend;
         const open = currentFortune;
         let close = currentFortune + change;
-        close = Math.max(5, Math.min(95, close));
+        close = Math.max(3, Math.min(97, close));
 
-        const high = Math.min(100, Math.max(open, close) + seededRandom(seed++) * volatility * 0.5);
-        const low = Math.max(0, Math.min(open, close) - seededRandom(seed++) * volatility * 0.5);
+        const high = Math.min(100, Math.max(open, close) + seededRandom(seed++) * volatility * 0.7);
+        const low = Math.max(0, Math.min(open, close) - seededRandom(seed++) * volatility * 0.7);
         const isBull = close >= open;
 
         currentFortune = close;
 
+        // Generate detailed story
         if (storyAges.has(age)) {
             const storyType = isBull ? 'bull' : 'bear';
-            if (age <= 5) {
-                story = pickStory(earlyChildhoodStories[storyType], seed + age);
+            if (age <= 2) {
+                story = pickStory(babyStories[storyType], seed + age);
+            } else if (age <= 5) {
+                story = pickStory(kindergartenStories[storyType], seed + age);
+            } else if (age <= 11) {
+                story = pickStory(primarySchoolStories[storyType], seed + age);
+            } else if (age <= 14) {
+                story = pickStory(middleSchoolStories[storyType], seed + age);
             } else if (age <= 17) {
-                story = pickStory(schoolStories[storyType], seed + age);
+                story = pickStory(highSchoolStories[storyType], seed + age);
             } else if (age <= 22) {
                 story = pickStory(uniStories[storyType], seed + age);
             } else if (age <= 30) {
-                story = pickStory(earlyCareer[storyType], seed + age);
+                // Mix in marriage/parenting stories at the right ages
+                if (age === marriageAge) {
+                    story = pickStory(marriageStories[storyType], seed + age);
+                } else if (age === childAge) {
+                    story = pickStory(parentingStories[storyType], seed + age);
+                } else {
+                    story = pickStory(earlyCareer[storyType], seed + age);
+                }
             } else if (age <= 50) {
-                story = pickStory(midCareer[storyType], seed + age);
+                if (age === childAge) {
+                    story = pickStory(parentingStories[storyType], seed + age);
+                } else {
+                    story = pickStory(midCareer[storyType], seed + age);
+                }
             } else if (age <= 60) {
-                story = pickStory(lateCareerStories[storyType], seed + age);
+                story = pickStory(lateCareerStoriesGen[storyType], seed + age);
             } else {
-                story = pickStory(retirementStories[storyType], seed + age);
+                story = pickStory(retirementStoriesGen[storyType], seed + age);
             }
         }
 

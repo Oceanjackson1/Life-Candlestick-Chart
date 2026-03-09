@@ -98,21 +98,36 @@ export default function OnboardingForm({ onComplete }: { onComplete: () => void 
                             )}
 
                             {currentStep === 1 && (
-                                <div className="flex gap-4">
-                                    {['male', 'female'].map(g => (
-                                        <button
-                                            key={g}
-                                            onClick={() => { setUserData({ gender: g as any }); setTimeout(nextStep, 300); }}
-                                            className={cn(
-                                                "flex-1 py-8 rounded-2xl border-2 transition-all text-lg font-medium",
-                                                userData.gender === g
-                                                    ? "border-black bg-black/5 dark:border-white dark:bg-white/10"
-                                                    : "border-border hover:border-black/30 dark:hover:border-white/30"
-                                            )}
-                                        >
-                                            {g === 'male' ? '男' : '女'}
-                                        </button>
-                                    ))}
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2 text-muted-foreground">你的名字</label>
+                                        <input
+                                            type="text"
+                                            placeholder="输入你的名字或昵称"
+                                            value={userData.name}
+                                            onChange={e => setUserData({ name: e.target.value })}
+                                            className="w-full bg-white/50 dark:bg-black/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-lg"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2 text-muted-foreground">性别</label>
+                                        <div className="flex gap-4">
+                                            {['male', 'female'].map(g => (
+                                                <button
+                                                    key={g}
+                                                    onClick={() => setUserData({ gender: g as any })}
+                                                    className={cn(
+                                                        "flex-1 py-4 rounded-2xl border-2 transition-all text-lg font-medium",
+                                                        userData.gender === g
+                                                            ? "border-black bg-black/5 dark:border-white dark:bg-white/10"
+                                                            : "border-border hover:border-black/30 dark:hover:border-white/30"
+                                                    )}
+                                                >
+                                                    {g === 'male' ? '男' : '女'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -155,41 +170,48 @@ export default function OnboardingForm({ onComplete }: { onComplete: () => void 
                             )}
 
                             {currentStep === 4 && (
-                                <div>
-                                    <p className="text-sm text-muted-foreground mb-4">选择最符合你的特质标签（可多选），也可以自己输入</p>
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {traitOptions.map(trait => {
-                                            const selected = (userData.traits || '').split('，').filter(Boolean).includes(trait);
-                                            return (
-                                                <button
-                                                    key={trait}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const current = (userData.traits || '').split('，').filter(Boolean);
-                                                        const next = selected
-                                                            ? current.filter(t => t !== trait)
-                                                            : [...current, trait];
-                                                        setUserData({ traits: next.join('，') });
-                                                    }}
-                                                    className={cn(
-                                                        "px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
-                                                        selected
-                                                            ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                                                            : "border-border hover:border-black/30 dark:hover:border-white/30 text-foreground"
-                                                    )}
-                                                >
-                                                    {trait}
-                                                </button>
-                                            );
-                                        })}
+                                <div className="space-y-5">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-3 text-muted-foreground">选择最符合你的标签（可多选）</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {traitOptions.map(trait => {
+                                                const selected = (userData.traits || '').split('，').filter(Boolean).includes(trait);
+                                                return (
+                                                    <button
+                                                        key={trait}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const current = (userData.traits || '').split('，').filter(Boolean);
+                                                            const next = selected
+                                                                ? current.filter(t => t !== trait)
+                                                                : [...current, trait];
+                                                            setUserData({ traits: next.join('，') });
+                                                        }}
+                                                        className={cn(
+                                                            "px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
+                                                            selected
+                                                                ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                                                                : "border-border hover:border-black/30 dark:hover:border-white/30 text-foreground"
+                                                        )}
+                                                    >
+                                                        {trait}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                    <input
-                                        type="text"
-                                        placeholder="或自由输入，用逗号分隔：如 细心，有耐心"
-                                        value={userData.traits}
-                                        onChange={e => setUserData({ traits: e.target.value })}
-                                        className="w-full bg-white/50 dark:bg-black/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
-                                    />
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2 text-muted-foreground">
+                                            {userData.name ? `${userData.name}还有什么特质？` : '你还有什么特质？'}
+                                        </label>
+                                        <textarea
+                                            rows={3}
+                                            placeholder="用你自己的话描述，例如：做事比较执着，喜欢钻研技术，有点社恐但对朋友很真诚..."
+                                            value={userData.traits}
+                                            onChange={e => setUserData({ traits: e.target.value })}
+                                            className="w-full bg-white/50 dark:bg-black/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm resize-none"
+                                        />
+                                    </div>
                                 </div>
                             )}
 

@@ -86,6 +86,16 @@ export default function PartnerOnboarding({ onComplete, onCancel }: { onComplete
                             {currentStep === 1 && (
                                 <div className="space-y-6">
                                     <div>
+                                        <label className="block text-sm font-medium mb-2 text-muted-foreground">TA 的名字</label>
+                                        <input
+                                            type="text"
+                                            placeholder="输入 TA 的名字或昵称"
+                                            value={partnerData.name || ''}
+                                            onChange={e => setPartnerData({ name: e.target.value })}
+                                            className="w-full bg-white/50 dark:bg-black/50 border border-border rounded-xl px-4 py-3 outline-none"
+                                        />
+                                    </div>
+                                    <div>
                                         <label className="block text-sm font-medium mb-2 text-muted-foreground">出生的年份 (可选)</label>
                                         <input
                                             type="number"
@@ -109,41 +119,48 @@ export default function PartnerOnboarding({ onComplete, onCancel }: { onComplete
                             )}
 
                             {currentStep === 2 && (
-                                <div>
-                                    <p className="text-sm text-muted-foreground mb-4">选择 TA 最突出的特质标签（可多选）</p>
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {partnerTraitOptions.map(trait => {
-                                            const selected = (partnerData.traits || '').split('，').filter(Boolean).includes(trait);
-                                            return (
-                                                <button
-                                                    key={trait}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const current = (partnerData.traits || '').split('，').filter(Boolean);
-                                                        const next = selected
-                                                            ? current.filter(t => t !== trait)
-                                                            : [...current, trait];
-                                                        setPartnerData({ traits: next.join('，') });
-                                                    }}
-                                                    className={cn(
-                                                        "px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
-                                                        selected
-                                                            ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                                                            : "border-border hover:border-black/30 dark:hover:border-white/30 text-foreground"
-                                                    )}
-                                                >
-                                                    {trait}
-                                                </button>
-                                            );
-                                        })}
+                                <div className="space-y-5">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-3 text-muted-foreground">选择 TA 最突出的特质（可多选）</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {partnerTraitOptions.map(trait => {
+                                                const selected = (partnerData.traits || '').split('，').filter(Boolean).includes(trait);
+                                                return (
+                                                    <button
+                                                        key={trait}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const current = (partnerData.traits || '').split('，').filter(Boolean);
+                                                            const next = selected
+                                                                ? current.filter(t => t !== trait)
+                                                                : [...current, trait];
+                                                            setPartnerData({ traits: next.join('，') });
+                                                        }}
+                                                        className={cn(
+                                                            "px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
+                                                            selected
+                                                                ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
+                                                                : "border-border hover:border-black/30 dark:hover:border-white/30 text-foreground"
+                                                        )}
+                                                    >
+                                                        {trait}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                    <input
-                                        type="text"
-                                        placeholder="或自由输入，用逗号分隔"
-                                        value={partnerData.traits || ''}
-                                        onChange={e => setPartnerData({ traits: e.target.value })}
-                                        className="w-full bg-white/50 dark:bg-black/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
-                                    />
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2 text-muted-foreground">
+                                            {partnerData.name ? `${partnerData.name}还有什么特质？` : 'TA 还有什么特质？'}
+                                        </label>
+                                        <textarea
+                                            rows={3}
+                                            placeholder="用你的话描述 TA，例如：很有责任心，做事雷厉风行，对家人特别好..."
+                                            value={partnerData.traits || ''}
+                                            onChange={e => setPartnerData({ traits: e.target.value })}
+                                            className="w-full bg-white/50 dark:bg-black/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm resize-none"
+                                        />
+                                    </div>
                                 </div>
                             )}
 

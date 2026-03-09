@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 export interface UserLifeData {
+    name: string;
     gender: 'male' | 'female' | '';
     birthYear: string;
     birthCity: string;
@@ -21,6 +22,7 @@ interface LifeStore {
 }
 
 const initialUserData: UserLifeData = {
+    name: '',
     gender: '',
     birthYear: '',
     birthCity: '',

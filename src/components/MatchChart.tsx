@@ -99,8 +99,8 @@ export default function MatchChart({ onBack }: { onBack: () => void }) {
                     <div className="mb-8 pl-4">
                         <h2 className="text-3xl font-bold tracking-tight mb-2">双生命运交汇图</h2>
                         <div className="flex gap-4 text-sm font-medium mt-4">
-                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-primary" /> 您</div>
-                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500" /> TA</div>
+                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-primary" /> {userData.name || '您'}</div>
+                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500" /> {partnerData.name || 'TA'}</div>
                         </div>
                     </div>
 

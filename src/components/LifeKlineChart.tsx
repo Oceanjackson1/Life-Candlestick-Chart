@@ -149,7 +149,9 @@ export default function LifeKlineChart({ onBack, onCalculatePartner }: { onBack:
 
             <div className="glass rounded-[2.5rem] p-6 md:p-10 shadow-2xl bg-white/40 dark:bg-black/40">
                 <div className="mb-10 text-center">
-                    <h2 className="text-3xl font-bold tracking-tight mb-2">您的人生 K 线</h2>
+                    <h2 className="text-3xl font-bold tracking-tight mb-2">
+                        {userData.name ? `${userData.name}的人生 K 线` : '您的人生 K 线'}
+                    </h2>
                     <p className="text-muted-foreground">这里是 0 - 80 岁的运势起伏流年</p>
                 </div>
 
